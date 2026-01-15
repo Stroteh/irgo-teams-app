@@ -1,0 +1,7 @@
+/*
+  X-Frame-Options: ALLOW-FROM https://teams.microsoft.com https://*.teams.microsoft.com
+  Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' https://statics.teams.cdn.office.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com data: blob:; frame-ancestors https://teams.microsoft.com https://*.teams.microsoft.com;
+  Access-Control-Allow-Origin: https://teams.microsoft.com https://*.teams.microsoft.com
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer-when-downgrade
+*/
