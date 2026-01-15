@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- CRITICAL: Teams CSP Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; frame-ancestors https://teams.microsoft.com https://teams.microsoft.us https://*.teams.microsoft.com https://*.teams.microsoft.us;">
+    <meta http-equiv="X-Frame-Options" content="ALLOW-FROM https://teams.microsoft.com">
+    <meta name="referrer" content="no-referrer">
+    
+    <title>IRGO - Ugodnosti zaposlenih</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Microsoft Teams JavaScript SDK -->
+    <script src="https://statics.teams.cdn.office.net/sdk/v1.11.0/js/MicrosoftTeams.min.js" crossorigin="anonymous" integrity="sha384-SCVFc1Xh+2QwMkUf0Cg9HrqTfZ9RxfQvzL9hPFXK7E1iI8FqC77D2URC2FyN2qKg"></script>
+    
+    <style>
+        :root {
+            --primary-color: #0056a6;
+            --secondary-color: #00a651;
+            --accent-color: #ff7f00;
+            --light-color: #f5f8fa;
+            --dark-color: #333333;
+            --gray-color: #e0e0e0;
+            --danger-color: #e53935;
+            --success-color: #00a651;
+            --teams-color: #464eb8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--teams-color));
+            color: white;
+            padding: 20px 0;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            background-color: white;
+            color: var(--teams-color);
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .logo span {
+            color: var(--accent-color);
+        }
+        
+        .teams-status {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .teams-status i {
+            color: white;
+        }
+        
+        .user-profile {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .profile-pic {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--teams-color), var(--primary-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .user-details .name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .user-details .role {
+            font-size: 13px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .user-details .team {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        .add-content-btn {
+            background-color: var(--teams-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .add-content-btn:hover {
+            background-color: #3a42a8;
+            transform: translateY(-2px);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--gray-color);
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        
+        .nav-tab {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            font-weight: 600;
+            cursor: pointer;
+            color: #666;
+            position: relative;
+            white-space: nowrap;
+        }
+        
+        .nav-tab.active {
+            color: var(--teams-color);
+        }
+        
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--teams-color);
+        }
+        
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .category-card {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .category-header {
+            padding: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .category-icon {
+            font-size: 24px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .category-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .category-content {
+            padding: 15px;
+            flex-grow: 1;
+        }
+        
+        .category-description {
+            margin-bottom: 15px;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .category-stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            background-color: var(--light-color);
+            padding: 4px 8px;
+            border-radius: 15px;
+        }
+        
+        .user-contributions {
+            font-size: 12px;
+            color: #777;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .category-features {
+            list-style-type: none;
+            margin-top: 12px;
+        }
+        
+        .category-features li {
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .category-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .category-features i {
+            color: var(--secondary-color);
+        }
+        
+        .user-added {
+            background-color: rgba(255, 255, 200, 0.3);
+            border-left: 3px solid var(--accent-color);
+            padding-left: 8px;
+            margin-left: -8px;
+        }
+        
+        .user-added i {
+            color: var(--accent-color);
+        }
+        
+        .category-actions {
+            padding: 12px 15px;
+            border-top: 1px solid var(--gray-color);
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .add-item-btn {
+            background: none;
+            border: none;
+            color: var(--teams-color);
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 8px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        .add-item-btn:hover {
+            background-color: rgba(70, 78, 184, 0.1);
+        }
+        
+        .category-1 .category-header { background-color: #4b53bc; }
+        .category-2 .category-header { background-color: #00a651; }
+        .category-3 .category-header { background-color: #ff7f00; }
+        .category-4 .category-header { background-color: #e53935; }
+        
+        /* Teams specifični stylovi */
+        .teams-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .teams-section h3 {
+            color: var(--teams-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .teams-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-card {
+            background-color: #f8f9ff;
+            border-left: 4px solid var(--teams-color);
+            padding: 12px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .info-card h4 {
+            color: var(--teams-color);
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .info-card p {
+            font-size: 13px;
+            color: #555;
+        }
+        
+        /* Modal stylovi */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            padding: 20px;
+            background-color: var(--teams-color);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-content {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        textarea.form-control {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--teams-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a42a8;
+        }
+        
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+        }
+        
+        .contributions-list {
+            margin-top: 20px;
+        }
+        
+        .contribution-item {
+            padding: 12px;
+            background-color: #f8f9ff;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--teams-color);
+        }
+        
+        .contribution-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .contribution-title {
+            font-weight: 600;
+            color: var(--teams-color);
+        }
+        
+        .contribution-category {
+            font-size: 12px;
+            background-color: #e0e7ff;
+            color: var(--teams-color);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .contribution-details {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .contribution-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #777;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px;
+            margin-top: 30px;
+            color: #666;
+            font-size: 13px;
+            border-top: 1px solid var(--gray-color);
+        }
+        
+        /* Teams tema */
+        .teams-dark body {
+            background-color: #2d2c2c;
+            color: #ffffff;
+        }
+        
+        .teams-dark .category-card,
+        .teams-dark .user-profile,
+        .teams-dark .teams-section,
+        .teams-dark .modal {
+            background-color: #3a3a3a;
+            color: #ffffff;
+        }
+        
+        .teams-dark .form-control {
+            background-color: #4a4a4a;
+            border-color: #555;
+            color: white;
+        }
+        
+        .teams-dark .category-description,
+        .teams-dark .contribution-details {
+            color: #ccc;
+        }
+        
+        /* Demo message */
+        .demo-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+            display: none;
+        }
+        
+        .teams-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .categories {
+                grid-template-columns: 1fr;
+            }
+            
+            .user-profile {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h1>IRGO <span>Ugodnosti</span></h1>
+                </div>
+                <div class="teams-status" id="teamsStatus">
+                    <i class="fab fa-microsoft"></i>
+                    <span>Povezovanje z Microsoft Teams...</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="user-profile">
+            <div class="user-info">
+                <div class="profile-pic" id="userAvatar">?</div>
+                <div class="user-details">
+                    <div class="name" id="userName">Nalaganje...</div>
+                    <div class="role" id="userTitle">Pridobivanje podatkov...</div>
+                    <div class="team" id="userTeam">Microsoft Teams</div>
+                </div>
+            </div>
+            <button class="add-content-btn" id="addContentBtn">
+                <i class="fas fa-plus-circle"></i>
+                Dodaj vsebino
+            </button>
+        </div>
+        
+        <!-- Demo/Teams Messages -->
+        <div class="demo-message" id="demoMessage">
+            <h3><i class="fas fa-info-circle"></i> Demo način</h3>
+            <p>Če vidiš to sporočilo, aplikacija te ne prepozna iz Teams. Dodaj aplikacijo v Teams za polno funkcionalnost.</p>
+        </div>
+        
+        <div class="teams-message" id="teamsMessage">
+            <h3><i class="fas fa-check-circle"></i> Povezano z Microsoft Teams</h3>
+            <p>Uspešno prepoznan uporabnik iz Teams okolja.</p>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="categories">Vse kategorije</button>
+            <button class="nav-tab" data-tab="my-content">Moji prispevki</button>
+            <button class="nav-tab" data-tab="calendar">Koledar</button>
+            <button class="nav-tab" data-tab="teams-info">Teams info</button>
+        </div>
+        
+        <!-- Vsebina za zavihke -->
+        <div id="tab-content">
+            <!-- Zavihek: Vse kategorije -->
+            <div class="tab-pane active" id="categories-tab">
+                <div class="categories">
+                    <!-- Kategorija 1: Družabno življenje -->
+                    <div class="category-card category-1" data-category="druzabno">
+                        <div class="category-header">
+                            <div class="category-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h2 class="category-title">Družabno življenje</h2>
+                        </div>
+                        <div class="category-content">
+                            <p class="category-description">Spoznaj kolege izven službe in krepimo timskega duha.</p>
+                            <div class="category-stats">
+                                <div class="stat">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span id="druzabno-count">10+</span> dogodkov letno
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Vključeno v delovni čas</span>
+                                </div>
+                            </div>
+                            <div class="user-contributions">
+                                <i class="fas fa-user-edit"></i>
+                                <span id="druzabno-contributions">3 uporabniški prispevki</span>
+                            </div>
+                            <ul class="category-features" id="druzabno-features">
+                                <li><i class="fas fa-check-circle"></i> Letni piknik za zaposlene</li>
+                                <li><i class="fas fa-check-circle"></i> Božična zabava z družinami</li>
+                                <li><i class="fas fa-check-circle"></i> Mesečni kavni sestanki</li>
+                                <li class="user-added"><i class="fas fa-user-plus"></i> <span>Športne aktivnosti (tekaška skupina)</span></li>
+                                <li class="user-added"><i class="fas fa-user-plus"></i> <span>Igranje odbojke vsak petek</span></li>
+                            </ul>
+                        </div>
+                        <div class="category-actions">
+                            <button class="add-item-btn" data-category="druzabno">
+                                <i class="fas fa-plus"></i>
+                                Dodaj dogodek
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Kategorija 2: Učenje in razvoj -->
+                    <div class="category-card category-2" data-category="ucenje">
+                        <div class="category-header">
+                            <div class="category-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <h2 class="category-title">Učenje in razvoj</h2>
+                        </div>
+                        <div class="category-content">
+                            <p class="category-description">Nenehno izpopolnjevanje s področja gradbeništva in managementa.</p>
+                            <div class="category-stats">
+                                <div class="stat">
+                                    <i class="fas fa-euro-sign"></i>
+                                    <span>V celoti financirano</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-book"></i>
+                                    <span id="ucenje-count">15+</span> tečajev letno
+                                </div>
+                            </div>
+                            <div class="user-contributions">
+                                <i class="fas fa-user-edit"></i>
+                                <span id="ucenje-contributions">2 uporabniška prispevka</span>
+                            </div>
+                            <ul class="category-features" id="ucenje-features">
+                                <li><i class="fas fa-check-circle"></i> Certificirani BIM tečaji</li>
+                                <li><i class="fas fa-check-circle"></i> Vodstvene veščine za nadzornike</li>
+                                <li class="user-added"><i class="fas fa-user-plus"></i> <span>Tečaj varstva na delu</span></li>
+                                <li><i class="fas fa-check-circle"></i> Konferenčne udeležbe (v tujini)</li>
+                            </ul>
+                        </div>
+                        <div class="category-actions">
+                            <button class="add-item-btn" data-category="ucenje">
+                                <i class="fas fa-plus"></i>
+                                Dodaj tečaj
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Kategorija 3: Finančne ugodnosti -->
+                    <div class="category-card category-3" data-category="finance">
+                        <div class="category-header">
+                            <div class="category-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h2 class="category-title">Finančne ugodnosti</h2>
+                        </div>
+                        <div class="category-content">
+                            <p class="category-description">Dodatne finančne ugodnosti in bonusi za vaš trud.</p>
+                            <div class="category-stats">
+                                <div class="stat">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>13. plača zajamčena</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-gift"></i>
+                                    <span>Uspešnostni bonusi</span>
+                                </div>
+                            </div>
+                            <div class="user-contributions">
+                                <i class="fas fa-user-edit"></i>
+                                <span id="finance-contributions">1 uporabniški prispevek</span>
+                            </div>
+                            <ul class="category-features" id="finance-features">
+                                <li><i class="fas fa-check-circle"></i> Regres po zakonu</li>
+                                <li><i class="fas fa-check-circle"></i> Bonusi za uspešno dokončanje projektov</li>
+                                <li><i class="fas fa-check-circle"></i> Pokojninski dodatek</li>
+                                <li class="user-added"><i class="fas fa-user-plus"></i> <span>Dodatno zavarovanje za službena potovanja</span></li>
+                            </ul>
+                        </div>
+                        <div class="category-actions">
+                            <button class="add-item-btn" data-category="finance">
+                                <i class="fas fa-plus"></i>
+                                Dodaj ugodnost
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Kategorija 4: Dobro počutje -->
+                    <div class="category-card category-4" data-category="wellness">
+                        <div class="category-header">
+                            <div class="category-icon">
+                                <i class="fas fa-heartbeat"></i>
+                            </div>
+                            <h2 class="category-title">Dobro počutje</h2>
+                        </div>
+                        <div class="category-content">
+                            <p class="category-description">Skrb za vaše zdravje in ravnovesje med delom in življenjem.</p>
+                            <div class="category-stats">
+                                <div class="stat">
+                                    <i class="fas fa-dumbbell"></i>
+                                    <span>Popusti na fitnes</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-umbrella-beach"></i>
+                                    <span>Dodatni dopust</span>
+                                </div>
+                            </div>
+                            <div class="user-contributions">
+                                <i class="fas fa-user-edit"></i>
+                                <span id="wellness-contributions">4 uporabniški prispevki</span>
+                            </div>
+                            <ul class="category-features" id="wellness-features">
+                                <li><i class="fas fa-check-circle"></i> Popust na članarino v fitnesu (30%)</li>
+                                <li class="user-added"><i class="fas fa-user-plus"></i> <span>Joga vsak ponedeljek popoldne</span></li>
+                                <li><i class="fas fa-check-circle"></i> Zdravstveni pregledi na delovnem mestu</li>
+                                <li class="user-added"><i class="fas fa-user-plus"></i> <span>Delovna miza za stoječe delo</span></li>
+                            </ul>
+                        </div>
+                        <div class="category-actions">
+                            <button class="add-item-btn" data-category="wellness">
+                                <i class="fas fa-plus"></i>
+                                Dodaj predlog
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Zavihek: Moji prispevki -->
+            <div class="tab-pane" id="my-content-tab" style="display: none;">
+                <div class="teams-section">
+                    <h3><i class="fas fa-user-edit"></i> Moji prispevki</h3>
+                    <div id="myContributionsList">
+                        <!-- Dinamično se generira -->
+                        <p id="noContributionsMsg">Nimate še nobenih prispevkov. Dodajte prvega s klikom na gumb "Dodaj vsebino".</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Zavihek: Koledar -->
+            <div class="tab-pane" id="calendar-tab" style="display: none;">
+                <div class="teams-section">
+                    <h3><i class="fas fa-calendar-alt"></i> Koledar dogodkov</h3>
+                    <div id="calendarContainer">
+                        <!-- Koledar se generira dinamično -->
+                        <p>Koledar se naloži...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Zavihek: Teams info -->
+            <div class="tab-pane" id="teams-info-tab" style="display: none;">
+                <div class="teams-section">
+                    <h3><i class="fab fa-microsoft"></i> Microsoft Teams integracija</h3>
+                    <div class="teams-info">
+                        <div class="info-card">
+                            <h4>Povezava s Teams</h4>
+                            <p>Ta aplikacija je popolnoma integrirana z Microsoft Teams. Podatki o uporabniku so avtomatsko pridobljeni iz Teams okolja.</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Dostopnost</h4>
+                            <p>Aplikacija je dostopna v vseh Teams kanalih in klepetih. Dodajte jo kot zavihek v vašem timu.</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Varni podatki</h4>
+                            <p>Vsi podatki so shranjeni v okviru vaše organizacije in so dostopni le članom vašega podjetja.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>Navodila za uporabo v Teams</h4>
+                        <p>1. Odprite Teams in pojdite v želeni kanal</p>
+                        <p>2. Kliknite "+" za dodajanje zavihka</p>
+                        <p>3. Izberite "Spletna stran" ali "Custom app"</p>
+                        <p>4. Vnesite URL te aplikacije</p>
+                        <p>5. Poimenujte zavihek "IRGO Ugodnosti"</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>Trenutni URL za Teams:</h4>
+                        <p style="background: #f0f0f0; padding: 10px; border-radius: 5px; font-family: monospace; word-break: break-all;" id="currentUrlDisplay">
+                            Nalaganje...
+                        </p>
+                        <button class="btn btn-primary" onclick="copyCurrentUrl()" style="margin-top: 10px;">
+                            <i class="fas fa-copy"></i> Kopiraj URL
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal za dodajanje vsebine -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 style="margin: 0; font-size: 20px;">Dodaj novo vsebino</h2>
+                <button class="modal-close" id="modalCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content">
+                <div class="form-group">
+                    <label for="contentCategory">Kategorija:</label>
+                    <select id="contentCategory" class="form-control">
+                        <option value="druzabno">Družabno življenje</option>
+                        <option value="ucenje">Učenje in razvoj</option>
+                        <option value="finance">Finančne ugodnosti</option>
+                        <option value="wellness">Dobro počutje</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contentType">Vrsta vsebine:</label>
+                    <select id="contentType" class="form-control">
+                        <option value="event">Dogodek</option>
+                        <option value="benefit">Ugodnost</option>
+                        <option value="course">Tečaj/izobraževanje</option>
+                        <option value="suggestion">Predlog</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contentTitle">Naslov:</label>
+                    <input type="text" id="contentTitle" class="form-control" placeholder="Vnesite naslov...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contentDescription">Opis:</label>
+                    <textarea id="contentDescription" class="form-control" placeholder="Podrobnejši opis..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contentDate">Datum (če je primerno):</label>
+                    <input type="date" id="contentDate" class="form-control">
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-secondary" id="cancelBtn">Prekliči</button>
+                    <button class="btn btn-primary" id="saveContentBtn">Shrani</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>IRGO Gradbeništvo d.o.o. | Integrirano z Microsoft Teams</p>
+            <p>Vse ugodnosti so rezervirane za zaposlene v podjetju</p>
+        </div>
+    </footer>
+
+    <script>
+        // ============================================
+        // GLOBALNE SPREMENLJIVKE
+        // ============================================
+        let teamsContext = null;
+        let currentUser = {
+            id: null,
+            name: "Neznan uporabnik",
+            email: null,
+            initials: "?",
+            title: "Zaposleni",
+            team: "IRGO"
+        };
+        
+        let contributions = JSON.parse(localStorage.getItem('irgoTeamsContributions')) || [];
+        let isInTeamsEnvironment = false;
+        let teamsInitialized = false;
+        
+        // ============================================
+        // TEAMS DETEKCIJA IN INICIALIZACIJA
+        // ============================================
+        
+        // Preveri ali smo v Teams okolju
+        function detectTeamsEnvironment() {
+            try {
+                // 1. Preveri če smo v iframe-u
+                if (window.self !== window.top) {
+                    console.log("Detected: In iframe (likely Teams)");
+                    return true;
+                }
+                
+                // 2. Preveri referrer
+                if (document.referrer && document.referrer.includes('teams.microsoft.com')) {
+                    console.log("Detected: Teams referrer");
+                    return true;
+                }
+                
+                // 3. Preveri URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('teams') || window.location.hash.includes('teams')) {
+                    console.log("Detected: Teams URL parameters");
+                    return true;
+                }
+                
+                // 4. Preveri če Teams SDK je na voljo
+                if (typeof microsoftTeams !== 'undefined') {
+                    console.log("Detected: Microsoft Teams SDK available");
+                    return true;
+                }
+                
+                return false;
+            } catch (error) {
+                // Če ne moremo dostopati do top window, smo verjetno v iframe-u
+                console.log("Error checking environment, assuming in iframe:", error);
+                return true;
+            }
+        }
+        
+        // Inicializiraj Teams SDK
+        function initializeTeamsSDK() {
+            if (typeof microsoftTeams === 'undefined') {
+                console.warn("Microsoft Teams SDK ni na voljo");
+                showDemoMode();
+                return;
+            }
+            
+            console.log("Inicializiram Microsoft Teams SDK...");
+            
+            microsoftTeams.initialize(() => {
+                console.log(" Teams SDK uspešno inicializiran");
+                teamsInitialized = true;
+                
+                microsoftTeams.getContext((context) => {
+                    if (context) {
+                        teamsContext = context;
+                        console.log(" Teams kontekst prejet:", context);
+                        
+                        // Prikaži Teams status
+                        showTeamsConnected();
+                        
+                        // Nastavi uporabniške podatke
+                        updateUserFromTeamsContext(context);
+                        
+                        // Nastavi temo
+                        if (context.theme === 'dark') {
+                            document.body.classList.add('teams-dark');
+                        }
+                        
+                        // Naloži podatke
+                        loadUserContributions();
+                        updateContributionCounters();
+                    } else {
+                        console.warn("⚠️ Teams kontekst ni bil prejet");
+                        showDemoMode();
+                    }
+                });
+                
+                // Poslušalec za temo
+                microsoftTeams.registerOnThemeChangeHandler((theme) => {
+                    if (theme === 'dark') {
+                        document.body.classList.add('teams-dark');
+                    } else {
+                        document.body.classList.remove('teams-dark');
+                    }
+                });
+                
+            }, (error) => {
+                console.error("❌ Napaka pri inicializaciji Teams SDK:", error);
+                showDemoMode();
+            });
+        }
+        
+        // Prikaži stanje Teams povezave
+        function showTeamsConnected() {
+            document.getElementById('teamsStatus').innerHTML = 
+                `<i class="fab fa-microsoft"></i> <span>Povezano z Microsoft Teams</span>`;
+            document.getElementById('teamsMessage').style.display = 'block';
+            document.getElementById('demoMessage').style.display = 'none';
+        }
+        
+        // Prikaži demo način
+        function showDemoMode() {
+            console.log(" Prikazujem demo način");
+            
+            // Nastavi demo uporabnika
+            currentUser = {
+                id: 'demo-user-' + Date.now(),
+                name: 'Demo Uporabnik',
+                email: 'demo@irgo.si',
+                initials: 'DU',
+                title: 'Inženir gradbeništva',
+                team: 'IRGO Demo Team'
+            };
+            
+            // Posodobi UI
+            updateUserDisplay();
+            
+            // Posodobi status
+            document.getElementById('teamsStatus').innerHTML = 
+                `<i class="fas fa-laptop"></i> <span>Demo način (dodaj v Teams)</span>`;
+            document.getElementById('demoMessage').style.display = 'block';
+            document.getElementById('teamsMessage').style.display = 'none';
+            
+            // Dodaj testne prispevke če jih še ni
+            if (contributions.length === 0) {
+                contributions = [
+                    {
+                        id: 1,
+                        userId: currentUser.id,
+                        userName: currentUser.name,
+                        userEmail: currentUser.email,
+                        category: 'druzabno',
+                        type: 'event',
+                        title: 'Športne aktivnosti (tekaška skupina)',
+                        description: 'Tekaška skupina vsak tork in četrtek po službi',
+                        date: new Date().toISOString().split('T')[0],
+                        dateAdded: new Date().toISOString(),
+                        status: 'potrjeno'
+                    },
+                    {
+                        id: 2,
+                        userId: 'user-456',
+                        userName: 'Ana Kovač',
+                        userEmail: 'ana.kovac@irgo.si',
+                        category: 'druzabno',
+                        type: 'event',
+                        title: 'Igranje odbojke vsak petek',
+                        description: 'Prostovoljno igranje odbojke na športnem igrišču ob podjetju',
+                        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                        dateAdded: new Date().toISOString(),
+                        status: 'v obravnavi'
+                    }
+                ];
+                localStorage.setItem('irgoTeamsContributions', JSON.stringify(contributions));
+            }
+            
+            // Naloži podatke
+            loadUserContributions();
+            updateContributionCounters();
+        }
+        
+        // ============================================
+        // UPORABNIŠKE FUNKCIJE
+        // ============================================
+        
+        // Posodobi uporabniške podatke iz Teams konteksta
+        function updateUserFromTeamsContext(context) {
+            console.log("Posodabljam uporabnika iz Teams...");
+            
+            // Dobi ID
+            currentUser.id = context.userObjectId || context.userPrincipalName || `user-${Date.now()}`;
+            
+            // Dobi ime iz emaila
+            let email = context.upn || context.userPrincipalName || context.loginHint;
+            
+            if (email) {
+                currentUser.email = email;
+                const emailName = email.split('@')[0];
+                
+                // Ekstrahiraj lepo ime iz emaila (npr. "john.doe" -> "John Doe")
+                const nameParts = emailName.split('.');
+                if (nameParts.length >= 2) {
+                    currentUser.name = nameParts.map(part => 
+                        part.charAt(0).toUpperCase() + part.slice(1)
+                    ).join(' ');
+                } else {
+                    currentUser.name = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+                }
+            } else {
+                currentUser.name = "Teams Uporabnik";
+                currentUser.email = "uporabnik@irgo.si";
+            }
+            
+            // Dobi iniciale
+            currentUser.initials = getInitials(currentUser.name);
+            
+            // Dobi ostale podatke
+            currentUser.title = context.userLicenseType || "Zaposleni";
+            currentUser.team = context.teamName || "IRGO Team";
+            
+            // Posodobi prikaz
+            updateUserDisplay();
+        }
+        
+        // Posodobi prikaz uporabnika v UI
+        function updateUserDisplay() {
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userTitle').textContent = currentUser.title;
+            document.getElementById('userTeam').textContent = currentUser.team;
+            document.getElementById('userAvatar').textContent = currentUser.initials;
+            
+            // Nastavi barvno ozadje za avatar
+            const avatar = document.getElementById('userAvatar');
+            const colorIndex = (currentUser.name.length + currentUser.id.length) % 5;
+            const colors = ['#0056a6', '#00a651', '#ff7f00', '#464eb8', '#e53935'];
+            avatar.style.background = `linear-gradient(135deg, ${colors[colorIndex]}, ${colors[(colorIndex + 1) % 5]})`;
+        }
+        
+        // Pridobi iniciale iz imena
+        function getInitials(name) {
+            if (!name || name.trim() === '') return '?';
+            
+            const parts = name.trim().split(' ');
+            if (parts.length === 0) return '?';
+            if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+            
+            return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+        }
+        
+        // ============================================
+        // PRISPEVKI IN UGODNOSTI
+        // ============================================
+        
+        // Naloži prispevke uporabnika
+        function loadUserContributions() {
+            const myContributions = contributions.filter(c => c.userId === currentUser.id);
+            const container = document.getElementById('myContributionsList');
+            
+            if (!container) return;
+            
+            if (myContributions.length === 0) {
+                container.innerHTML = '<p id="noContributionsMsg">Nimate še nobenih prispevkov. Dodajte prvega s klikom na gumb "Dodaj vsebino".</p>';
+                return;
+            }
+            
+            let html = '';
+            const categoryNames = {
+                'druzabno': 'Družabno življenje',
+                'ucenje': 'Učenje in razvoj',
+                'finance': 'Finančne ugodnosti',
+                'wellness': 'Dobro počutje'
+            };
+            
+            const typeNames = {
+                'event': 'Dogodek',
+                'benefit': 'Ugodnost',
+                'course': 'Tečaj',
+                'suggestion': 'Predlog'
+            };
+            
+            myContributions.forEach(contribution => {
+                html += `
+                    <div class="contribution-item">
+                        <div class="contribution-header">
+                            <div class="contribution-title">${contribution.title}</div>
+                            <div class="contribution-category">${categoryNames[contribution.category] || contribution.category}</div>
+                        </div>
+                        <div class="contribution-details">${contribution.description}</div>
+                        <div class="contribution-footer">
+                            <div>${typeNames[contribution.type] || contribution.type} • ${new Date(contribution.dateAdded).toLocaleDateString('sl-SI')}</div>
+                            <div style="color: ${contribution.status === 'potrjeno' ? 'green' : 'orange'}">
+                                ${contribution.status === 'potrjeno' ? ' Odobreno' : ' V obravnavi'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Posodobi števce prispevkov
+        function updateContributionCounters() {
+            const categories = ['druzabno', 'ucenje', 'finance', 'wellness'];
+            
+            categories.forEach(category => {
+                const categoryContributions = contributions.filter(c => c.category === category);
+                const countElement = document.getElementById(`${category}-contributions`);
+                if (countElement) {
+                    const count = categoryContributions.length;
+                    countElement.textContent = `${count} uporabnišk${count === 1 ? 'i' : 'ih'} prispevkov`;
+                }
+                
+                // Posodobi tudi števec v naslovu
+                const countNumberElement = document.getElementById(`${category}-count`);
+                if (countNumberElement) {
+                    const baseCount = parseInt(countNumberElement.textContent) || 10;
+                    countNumberElement.textContent = `${baseCount + categoryContributions.length}+`;
+                }
+            });
+        }
+        
+        // Shrani nov prispevek
+        function saveContribution(contributionData) {
+            const newContribution = {
+                id: Date.now(),
+                userId: currentUser.id,
+                userName: currentUser.name,
+                userEmail: currentUser.email,
+                ...contributionData,
+                dateAdded: new Date().toISOString(),
+                status: 'v obravnavi'
+            };
+            
+            contributions.push(newContribution);
+            localStorage.setItem('irgoTeamsContributions', JSON.stringify(contributions));
+            
+            // Dodaj v kategorijo
+            addContributionToCategory(newContribution);
+            
+            // Posodobi števce
+            updateContributionCounters();
+            
+            // Ponovno naloži prispevke
+            loadUserContributions();
+            
+            // Prikaži obvestilo
+            showNotification('Vaš prispevek je bil uspešno dodan!');
+        }
+        
+        // Dodaj prispevek v kategorijo
+        function addContributionToCategory(contribution) {
+            const categoryFeatures = document.getElementById(`${contribution.category}-features`);
+            if (!categoryFeatures) return;
+            
+            const newItem = document.createElement('li');
+            newItem.className = 'user-added';
+            newItem.innerHTML = `<i class="fas fa-user-plus"></i> <span>${contribution.title} - dodal ${contribution.userName}</span>`;
+            
+            categoryFeatures.appendChild(newItem);
+        }
+        
+        // Prikaži obvestilo
+        function showNotification(message) {
+            // Če smo v Teams, uporabi Teams notification
+            if (teamsInitialized && typeof microsoftTeams !== 'undefined') {
+                microsoftTeams.tasks.submitTask({
+                    type: 'success',
+                    message: message
+                });
+            } else {
+                // Drugače uporabi alert
+                alert(message);
+            }
+        }
+        
+        // ============================================
+        // UI FUNKCIJE
+        // ============================================
+        
+        // Preklopi zavihke
+        function setupTabs() {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Odstrani aktivni razred
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+                    
+                    // Dodaj trenutnemu
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    const pane = document.getElementById(`${tabId}-tab`);
+                    if (pane) {
+                        pane.style.display = 'block';
+                        
+                        // Če je zavihek koledar, generiraj koledar
+                        if (tabId === 'calendar') {
+                            generateCalendar();
+                        }
+                        
+                        // Če je zavihek Teams info, posodobi URL
+                        if (tabId === 'teams-info') {
+                            document.getElementById('currentUrlDisplay').textContent = window.location.href;
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Odpri modal za dodajanje vsebine
+        function openAddContentModal(presetCategory = null) {
+            if (presetCategory) {
+                document.getElementById('contentCategory').value = presetCategory;
+            }
+            
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('contentTitle').focus();
+        }
+        
+        // Zapri modal
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('contentTitle').value = '';
+            document.getElementById('contentDescription').value = '';
+            document.getElementById('contentDate').value = '';
+        }
+        
+        // Shrani vsebino iz modal-a
+        function saveContent() {
+            const category = document.getElementById('contentCategory').value;
+            const type = document.getElementById('contentType').value;
+            const title = document.getElementById('contentTitle').value.trim();
+            const description = document.getElementById('contentDescription').value.trim();
+            const date = document.getElementById('contentDate').value;
+            
+            if (!title) {
+                alert('Prosimo, vnesite naslov.');
+                return;
+            }
+            
+            if (!description) {
+                alert('Prosimo, vnesite opis.');
+                return;
+            }
+            
+            const contributionData = {
+                category,
+                type,
+                title,
+                description,
+                date: date || new Date().toISOString().split('T')[0]
+            };
+            
+            saveContribution(contributionData);
+            closeModal();
+        }
+        
+        // Prikaži podrobnosti kategorije
+        function showCategoryDetails(category) {
+            const categoryNames = {
+                'druzabno': 'Družabno življenje',
+                'ucenje': 'Učenje in razvoj',
+                'finance': 'Finančne ugodnosti',
+                'wellness': 'Dobro počutje'
+            };
+            
+            const categoryDescriptions = {
+                'druzabno': 'Vse o družabnem življenju v IRGO. Spoznajte kolege izven službe in krepimo timskega duha.',
+                'ucenje': 'Vse o učenju in razvoju v IRGO. Nenehno izpopolnjevanje s področja gradbeništva in managementa.',
+                'finance': 'Vse o finančnih ugodnostih v IRGO. Dodatne finančne ugodnosti in bonusi za vaš trud.',
+                'wellness': 'Vse o dobrem počutju v IRGO. Skrb za vaše zdravje in ravnovesje med delom in življenjem.'
+            };
+            
+            alert(`${categoryNames[category]}\n\n${categoryDescriptions[category]}`);
+        }
+        
+        // Generiraj koledar
+        function generateCalendar() {
+            const container = document.getElementById('calendarContainer');
+            if (!container) return;
+            
+            const now = new Date();
+            const month = now.getMonth();
+            const year = now.getFullYear();
+            
+            const monthNames = ['Januar', 'Februar', 'Marec', 'April', 'Maj', 'Junij', 
+                               'Julij', 'Avgust', 'September', 'Oktober', 'November', 'December'];
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            let startingDay = firstDay.getDay();
+            startingDay = startingDay === 0 ? 6 : startingDay - 1;
+            
+            let html = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h4>${monthNames[month]} ${year}</h4>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 20px;">
+                    <div style="text-align: center; font-weight: bold; padding: 5px; background-color: #f0f0f0; border-radius: 5px;">Pon</div>
+                    <div style="text-align: center; font-weight: bold; padding: 5px; background-color: #f0f0f0; border-radius: 5px;">Tor</div>
+                    <div style="text-align: center; font-weight: bold; padding: 5px; background-color: #f0f0f0; border-radius: 5px;">Sre</div>
+                    <div style="text-align: center; font-weight: bold; padding: 5px; background-color: #f0f0f0; border-radius: 5px;">Čet</div>
+                    <div style="text-align: center; font-weight: bold; padding: 5px; background-color: #f0f0f0; border-radius: 5px;">Pet</div>
+                    <div style="text-align: center; font-weight: bold; padding: 5px; background-color: #f0f0f0; border-radius: 5px;">Sob</div>
+                    <div style="text-align: center; font-weight: bold; padding: 5px; background-color: #f0f0f0; border-radius: 5px;">Ned</div>
+            `;
+            
+            // Prazni dnevi
+            for (let i = 0; i < startingDay; i++) {
+                html += `<div style="height: 40px; border-radius: 5px;"></div>`;
+            }
+            
+            // Dnevi v mesecu
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayContributions = contributions.filter(c => c.date === dateStr);
+                const isToday = day === now.getDate() && month === now.getMonth();
+                
+                let dayStyle = `height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 5px;`;
+                
+                if (isToday) {
+                    dayStyle += ` background-color: #4b53bc; color: white; font-weight: bold;`;
+                } else if (dayContributions.length > 0) {
+                    dayStyle += ` background-color: #00a651; color: white;`;
+                } else {
+                    dayStyle += ` background-color: white; border: 1px solid #eee;`;
+                }
+                
+                html += `<div style="${dayStyle}" title="${dayContributions.length > 0 ? dayContributions.map(c => c.title).join(', ') : ''}">${day}</div>`;
+            }
+            
+            html += `</div>`;
+            
+            // Prihajajoči dogodki
+            const upcomingEvents = contributions
+                .filter(c => c.type === 'event' && new Date(c.date) >= new Date())
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .slice(0, 5);
+            
+            if (upcomingEvents.length > 0) {
+                html += `<h4>Prihajajoči dogodki:</h4>`;
+                upcomingEvents.forEach(event => {
+                    const eventDate = new Date(event.date);
+                    html += `
+                        <div class="contribution-item" style="margin-bottom: 10px;">
+                            <div class="contribution-header">
+                                <div class="contribution-title">${event.title}</div>
+                                <div class="contribution-category">${eventDate.toLocaleDateString('sl-SI')}</div>
+                            </div>
+                            <div class="contribution-details">${event.description}</div>
+                            <div class="contribution-footer">
+                                <div>Dodal: ${event.userName}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<p>Ni prihajajočih dogodkov.</p>`;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        // Kopiraj trenutni URL
+        function copyCurrentUrl() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                showNotification('URL uspešno kopiran!');
+            }).catch(err => {
+                console.error('Error copying URL:', err);
+                alert('Napaka pri kopiranju URL-ja');
+            });
+        }
+        
+        // ============================================
+        // INICIALIZACIJA APLIKACIJE
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log(" IRGO Teams aplikacija se zaganja...");
+            
+            // Nastavi zavihke
+            setupTabs();
+            
+            // Preveri okolje
+            isInTeamsEnvironment = detectTeamsEnvironment();
+            console.log(`Teams okolje zaznano: ${isInTeamsEnvironment}`);
+            
+            if (isInTeamsEnvironment) {
+                // Počakaj malo in poskusi inicializirati Teams
+                setTimeout(() => {
+                    initializeTeamsSDK();
+                }, 500);
+            } else {
+                // Takoj prikaži demo način
+                showDemoMode();
+            }
+            
+            // Nastavi event listenerje
+            document.getElementById('addContentBtn').addEventListener('click', () => openAddContentModal());
+            document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('saveContentBtn').addEventListener('click', saveContent);
+            
+            document.querySelectorAll('.add-item-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const category = this.getAttribute('data-category');
+                    openAddContentModal(category);
+                });
+            });
+            
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const category = this.getAttribute('data-category');
+                    showCategoryDetails(category);
+                });
+            });
+            
+            // Dodaj klik na modal overlay za zapiranje
+            document.getElementById('modalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+            
+            console.log(" Aplikacija inicializirana");
+        });
+    </script>
+</body>
+</html>
