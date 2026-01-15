@@ -4,19 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- TEAMS DESKTOP FIX - CRITICAL HEADERS -->
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src *; frame-ancestors https://*.teams.microsoft.com https://teams.microsoft.com https://*.teams.microsoft.us https://teams.microsoft.us; font-src * data:;">
-    <meta http-equiv="X-Frame-Options" content="ALLOW-FROM https://teams.microsoft.com">
-    <meta name="referrer" content="no-referrer">
-    <meta name="robots" content="noindex,nofollow">
+    <!-- TEAMS DESKTOP CRITICAL HEADERS - FIXED VERSION -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors teams.microsoft.com *.teams.microsoft.com *.teams.microsoft.us teams.microsoft.us *.skype.com; font-src * data:;">
     
     <title>IRGO - Ugodnosti zaposlenih</title>
     
     <!-- Teams SDK - MUST BE FIRST -->
-    <script src="https://statics.teams.cdn.office.net/sdk/v1.11.0/js/MicrosoftTeams.min.js" crossorigin="anonymous" integrity="sha384-SCVFc1Xh+2QwMkUf0Cg9HrqTfZ9RxfQvzL9hPFXK7E1iI8FqC77D2URC2FyN2qKg"></script>
+    <script src="https://statics.teams.cdn.office.net/sdk/v1.11.0/js/MicrosoftTeams.min.js" crossorigin="anonymous"></script>
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
@@ -56,8 +53,6 @@
             border-radius: 12px;
             margin-bottom: 25px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
         }
         
         .header-content {
@@ -65,8 +60,6 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            position: relative;
-            z-index: 2;
         }
         
         .logo {
@@ -106,8 +99,12 @@
             font-size: 14px;
         }
         
-        .teams-status i {
-            color: white;
+        .teams-status.connected {
+            background-color: rgba(0, 166, 81, 0.3);
+        }
+        
+        .teams-status.disconnected {
+            background-color: rgba(255, 0, 0, 0.2);
         }
         
         .user-profile {
@@ -572,17 +569,6 @@
             border-top: 1px solid var(--gray-color);
         }
         
-        /* Demo/Teams messages */
-        .demo-message {
-            background: #fff3cd;
-            color: #856404;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #ffc107;
-            display: none;
-        }
-        
         .teams-message {
             background: #d4edda;
             color: #155724;
@@ -590,17 +576,36 @@
             border-radius: 8px;
             margin: 20px 0;
             border-left: 4px solid #28a745;
-            display: none;
         }
         
-        .debug-info {
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
-            margin: 10px 0;
-            display: none;
+        .demo-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .teams-instructions {
+            background: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .teams-instructions h4 {
+            color: var(--teams-color);
+            margin-bottom: 10px;
+        }
+        
+        .teams-instructions ol {
+            margin-left: 20px;
+        }
+        
+        .teams-instructions li {
+            margin-bottom: 5px;
         }
         
         @media (max-width: 768px) {
@@ -643,6 +648,37 @@
             </div>
         </header>
         
+        <!-- Teams Message -->
+        <div class="teams-message" id="teamsMessage" style="display: none;">
+            <h3><i class="fas fa-check-circle"></i> Povezano z Microsoft Teams</h3>
+            <p>Uspešno prepoznan uporabnik iz Teams okolja.</p>
+        </div>
+        
+        <!-- Demo Message -->
+        <div class="demo-message" id="demoMessage" style="display: none;">
+            <h3><i class="fas fa-info-circle"></i> Demo način</h3>
+            <p>Če vidiš to sporočilo, aplikacija te ne prepozna iz Teams. Dodaj aplikacijo v Teams za polno funkcionalnost.</p>
+        </div>
+        
+        <!-- Teams Instructions -->
+        <div class="teams-instructions" id="teamsInstructions">
+            <h4><i class="fab fa-microsoft"></i> Navodila za dodajanje v Teams Desktop:</h4>
+            <ol>
+                <li>V Teams Desktop odpri kanal, kjer želiš dodati aplikacijo</li>
+                <li>Klikni <strong>+</strong> za dodajanje zavihka</li>
+                <li>Izberi <strong>"Spletna stran"</strong> iz seznama aplikacij</li>
+                <li>V polje "URL" vnesi naslednji naslov: <code id="currentUrlDisplay">nalaganje...</code></li>
+                <li>V polje "Ime" vnesi <strong>"IRGO Ugodnosti"</strong></li>
+                <li>Klikni <strong>Shrani</strong> in aplikacija se bo prikazala v kanalu</li>
+            </ol>
+            <button class="btn btn-primary" onclick="copyCurrentUrl()">
+                <i class="fas fa-copy"></i> Kopiraj URL
+            </button>
+            <button class="btn btn-secondary" onclick="refreshTeamsConnection()">
+                <i class="fas fa-sync-alt"></i> Ponovno poveži s Teams
+            </button>
+        </div>
+        
         <div class="user-profile">
             <div class="user-info">
                 <div class="profile-pic" id="userAvatar">?</div>
@@ -656,23 +692,6 @@
                 <i class="fas fa-plus-circle"></i>
                 Dodaj vsebino
             </button>
-        </div>
-        
-        <!-- Messages -->
-        <div class="demo-message" id="demoMessage">
-            <h3><i class="fas fa-info-circle"></i> Demo način</h3>
-            <p>Če vidiš to sporočilo, aplikacija te ne prepozna iz Teams. Dodaj aplikacijo v Teams za polno funkcionalnost.</p>
-        </div>
-        
-        <div class="teams-message" id="teamsMessage">
-            <h3><i class="fas fa-check-circle"></i> Povezano z Microsoft Teams</h3>
-            <p>Uspešno prepoznan uporabnik iz Teams okolja.</p>
-        </div>
-        
-        <!-- Debug info (hidden by default) -->
-        <div class="debug-info" id="debugInfo">
-            <strong>Debug Info:</strong>
-            <div id="debugContent"></div>
         </div>
         
         <!-- Tabs -->
@@ -863,25 +882,12 @@
                     </div>
                     
                     <div class="info-card">
-                        <h4>Navodila za Teams Desktop:</h4>
-                        <p>1. V Teams Desktop klikni <strong>+</strong> v kanalu</p>
-                        <p>2. Izberi <strong>Spletna stran</strong></p>
-                        <p>3. Vnesi URL: <code id="currentUrlDisplay">nalaganje...</code></p>
-                        <p>4. Poimenuj zavihek: "IRGO Ugodnosti"</p>
-                        <button class="btn btn-primary" onclick="copyCurrentUrl()" style="margin-top: 10px;">
-                            <i class="fas fa-copy"></i> Kopiraj URL
-                        </button>
-                    </div>
-                    
-                    <div class="info-card">
-                        <h4>Težave z Teams Desktop?</h4>
-                        <p>Če se stran odpira v brskalniku namesto v Teams:</p>
-                        <ol style="margin-left: 20px; margin-top: 10px;">
-                            <li>Zapri Teams Desktop</li>
-                            <li>Clear Teams cache</li>
-                            <li>Zaženi Teams na novo</li>
-                            <li>Dodaj aplikacijo ponovno</li>
-                        </ol>
+                        <h4>Debug informacije:</h4>
+                        <div id="debugInfo">
+                            <p><strong>Teams SDK:</strong> <span id="teamsSdkStatus">Preverjam...</span></p>
+                            <p><strong>V okvirju:</strong> <span id="iframeStatus">Preverjam...</span></p>
+                            <p><strong>Uporabnik:</strong> <span id="userStatus">Preverjam...</span></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -950,51 +956,6 @@
 
     <script>
         // ============================================
-        // TEAMS DESKTOP FIX - NA ZAČETEK
-        // ============================================
-        
-        // Force allow embedding in iframe
-        try {
-            // Remove any iframe blocking
-            if (window.self !== window.top) {
-                console.log('✅ Running inside iframe (Teams Desktop)');
-                // Teams Desktop specific fix
-                try {
-                    // Allow parent to access iframe
-                    window.parent.postMessage('teams-app-ready', '*');
-                } catch(e) {}
-            }
-        } catch(e) {
-            console.log('✅ Cannot access parent - running in Teams iframe');
-        }
-        
-        // Debug function to show info
-        function showDebugInfo() {
-            const debugInfo = {
-                userAgent: navigator.userAgent,
-                inIframe: window.self !== window.top,
-                referrer: document.referrer,
-                teamsSDK: typeof microsoftTeams !== 'undefined',
-                location: window.location.href,
-                timestamp: new Date().toISOString()
-            };
-            
-            console.log('=== TEAMS DESKTOP DEBUG ===', debugInfo);
-            
-            // Display debug info if ?debug in URL
-            if (window.location.search.includes('debug')) {
-                document.getElementById('debugInfo').style.display = 'block';
-                document.getElementById('debugContent').innerHTML = 
-                    Object.entries(debugInfo).map(([key, value]) => 
-                        `<div><strong>${key}:</strong> ${value}</div>`
-                    ).join('');
-            }
-        }
-        
-        // Run debug on load
-        showDebugInfo();
-        
-        // ============================================
         // GLOBAL VARIABLES
         // ============================================
         let teamsContext = null;
@@ -1011,16 +972,373 @@
         let teamsInitialized = false;
         
         // ============================================
-        // TEAMS INITIALIZATION
+        // TEAMS INITIALIZATION - FIXED VERSION
         // ============================================
         
         function initializeTeams() {
             console.log('🔄 Initializing Teams SDK...');
+            document.getElementById('teamsSdkStatus').textContent = 'Initializing...';
             
             // Check if Teams SDK is available
             if (typeof microsoftTeams === 'undefined') {
-                console.warn('⚠️ Microsoft Teams SDK not available');
+                console.warn('⚠️ Microsoft Teams SDK not available - running in browser');
+                document.getElementById('teamsSdkStatus').textContent = 'Ni na voljo (brskalnik)';
                 showDemoMode();
                 return;
             }
             
+            // Check if we're in an iframe (Teams Desktop)
+            const inIframe = window.self !== window.top;
+            document.getElementById('iframeStatus').textContent = inIframe ? 'Da (Teams Desktop)' : 'Ne (brskalnik)';
+            
+            // Initialize Teams SDK
+            microsoftTeams.initialize(() => {
+                console.log('✅ Teams SDK initialized successfully');
+                document.getElementById('teamsSdkStatus').textContent = 'Initialized';
+                
+                // Get Teams context
+                microsoftTeams.getContext((context) => {
+                    console.log('📋 Teams context received:', context);
+                    teamsContext = context;
+                    teamsInitialized = true;
+                    
+                    // Update Teams status
+                    const statusElement = document.getElementById('teamsStatus');
+                    statusElement.innerHTML = '<i class="fab fa-microsoft"></i><span>Povezan z Microsoft Teams</span>';
+                    statusElement.classList.add('connected');
+                    
+                    // Show success message
+                    document.getElementById('teamsMessage').style.display = 'block';
+                    document.getElementById('teamsInstructions').style.display = 'none';
+                    
+                    // Set user info from Teams context
+                    if (context.userPrincipalName || context.upn) {
+                        const email = context.userPrincipalName || context.upn;
+                        currentUser.email = email;
+                        currentUser.name = context.userDisplayName || context.userPrincipalName.split('@')[0] || "Uporabnik";
+                        currentUser.initials = getInitials(currentUser.name);
+                        currentUser.id = context.userId || context.userObjectId || email;
+                        currentUser.title = context.userRole || "Zaposleni";
+                        currentUser.team = context.teamName || "IRGO Teams";
+                        
+                        // Update UI
+                        updateUserUI();
+                        document.getElementById('userStatus').textContent = 'Prepoznan: ' + currentUser.name;
+                    } else {
+                        // If no user info, use demo
+                        showDemoMode();
+                    }
+                    
+                    // Check if running in Teams Desktop
+                    if (context.frameContext === 'content') {
+                        console.log('✅ Running in Teams Desktop app');
+                    } else if (context.frameContext === 'settings') {
+                        console.log('ℹ️ Running in Teams settings');
+                    } else {
+                        console.log('ℹ️ Teams context:', context.frameContext);
+                    }
+                });
+                
+            }, (error) => {
+                console.error('❌ Teams SDK initialization failed:', error);
+                document.getElementById('teamsSdkStatus').textContent = 'Napaka: ' + error;
+                showDemoMode();
+            });
+            
+            // Register message handlers for Teams
+            microsoftTeams.registerOnThemeChangeHandler((theme) => {
+                console.log('Theme changed:', theme);
+            });
+        }
+        
+        // ============================================
+        // DEMO MODE (when not in Teams)
+        // ============================================
+        function showDemoMode() {
+            console.log('🔸 Running in demo mode');
+            
+            // Update Teams status
+            const statusElement = document.getElementById('teamsStatus');
+            statusElement.innerHTML = '<i class="fas fa-globe"></i><span>Demo način (ni v Teams)</span>';
+            statusElement.classList.add('disconnected');
+            
+            // Show demo message
+            document.getElementById('demoMessage').style.display = 'block';
+            document.getElementById('teamsInstructions').style.display = 'block';
+            
+            // Set demo user
+            currentUser.name = "Demo Uporabnik";
+            currentUser.initials = "DU";
+            currentUser.title = "Gradbeni inženir";
+            currentUser.team = "IRGO Gradbeništvo";
+            
+            // Update UI
+            updateUserUI();
+            document.getElementById('userStatus').textContent = 'Demo način';
+            
+            // Show current URL for copying
+            document.getElementById('currentUrlDisplay').textContent = window.location.href;
+        }
+        
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        
+        function getInitials(name) {
+            return name.split(' ')
+                .map(part => part[0])
+                .join('')
+                .toUpperCase()
+                .substring(0, 2);
+        }
+        
+        function updateUserUI() {
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userTitle').textContent = currentUser.title;
+            document.getElementById('userTeam').textContent = currentUser.team;
+            document.getElementById('userAvatar').textContent = currentUser.initials;
+        }
+        
+        function copyCurrentUrl() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ URL je kopiran v odložišče! Vnesite ga v Teams kot "Spletna stran".');
+            });
+        }
+        
+        function refreshTeamsConnection() {
+            console.log('Refreshing Teams connection...');
+            location.reload();
+        }
+        
+        // ============================================
+        // CONTRIBUTIONS MANAGEMENT
+        // ============================================
+        
+        function loadContributions() {
+            contributions = JSON.parse(localStorage.getItem('irgoTeamsContributions')) || [];
+            
+            // Update counts for each category
+            const categories = ['druzabno', 'ucenje', 'finance', 'wellness'];
+            categories.forEach(category => {
+                const count = contributions.filter(c => c.category === category).length;
+                document.getElementById(`${category}-contributions`).textContent = 
+                    `${count} uporabniških prispevkov`;
+                
+                // Add user contributions to feature list
+                const userFeatures = contributions
+                    .filter(c => c.category === category)
+                    .map(c => `<li class="user-added"><i class="fas fa-user-plus"></i> ${c.title}</li>`);
+                
+                if (userFeatures.length > 0) {
+                    document.getElementById(`${category}-features`).innerHTML += userFeatures.join('');
+                }
+            });
+            
+            // Update "My Contributions" tab
+            updateMyContributionsTab();
+        }
+        
+        function updateMyContributionsTab() {
+            const myContributionsList = document.getElementById('myContributionsList');
+            const noContributionsMsg = document.getElementById('noContributionsMsg');
+            
+            if (contributions.length === 0) {
+                noContributionsMsg.style.display = 'block';
+                return;
+            }
+            
+            noContributionsMsg.style.display = 'none';
+            
+            // Filter contributions by current user (in Teams mode)
+            let userContributions = contributions;
+            if (currentUser.id && currentUser.id !== null) {
+                userContributions = contributions.filter(c => c.userId === currentUser.id);
+            }
+            
+            if (userContributions.length === 0) {
+                myContributionsList.innerHTML = '<p>Nimate še nobenih prispevkov.</p>';
+                return;
+            }
+            
+            const contributionsHTML = userContributions.map(contribution => `
+                <div class="contribution-item">
+                    <div class="contribution-header">
+                        <div class="contribution-title">${contribution.title}</div>
+                        <div class="contribution-category">${getCategoryName(contribution.category)}</div>
+                    </div>
+                    <div class="contribution-details">${contribution.description}</div>
+                    <div class="contribution-footer">
+                        <div class="contribution-type">${getTypeName(contribution.type)}</div>
+                        <div class="contribution-date">${contribution.date || 'Brez datuma'}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            myContributionsList.innerHTML = contributionsHTML;
+        }
+        
+        function getCategoryName(category) {
+            const categories = {
+                'druzabno': 'Družabno življenje',
+                'ucenje': 'Učenje in razvoj',
+                'finance': 'Finančne ugodnosti',
+                'wellness': 'Dobro počutje'
+            };
+            return categories[category] || category;
+        }
+        
+        function getTypeName(type) {
+            const types = {
+                'event': 'Dogodek',
+                'benefit': 'Ugodnost',
+                'course': 'Tečaj',
+                'suggestion': 'Predlog'
+            };
+            return types[type] || type;
+        }
+        
+        // ============================================
+        // MODAL FUNCTIONS
+        // ============================================
+        
+        function openModal(category) {
+            if (category) {
+                document.getElementById('contentCategory').value = category;
+            }
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            // Clear form
+            document.getElementById('contentTitle').value = '';
+            document.getElementById('contentDescription').value = '';
+            document.getElementById('contentDate').value = '';
+        }
+        
+        function saveContribution() {
+            const title = document.getElementById('contentTitle').value.trim();
+            const description = document.getElementById('contentDescription').value.trim();
+            const category = document.getElementById('contentCategory').value;
+            const type = document.getElementById('contentType').value;
+            const date = document.getElementById('contentDate').value;
+            
+            if (!title) {
+                alert('Vnesite naslov!');
+                return;
+            }
+            
+            const contribution = {
+                id: Date.now(),
+                title,
+                description,
+                category,
+                type,
+                date,
+                userId: currentUser.id,
+                userName: currentUser.name,
+                timestamp: new Date().toISOString()
+            };
+            
+            contributions.push(contribution);
+            localStorage.setItem('irgoTeamsContributions', JSON.stringify(contributions));
+            
+            closeModal();
+            loadContributions();
+            
+            // Show success message
+            alert('✅ Prispevek je bil uspešno shranjen!');
+        }
+        
+        // ============================================
+        // TAB MANAGEMENT
+        // ============================================
+        
+        function switchTab(tabName) {
+            // Update active tab button
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.nav-tab[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Show active tab content
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.style.display = 'none';
+            });
+            document.getElementById(`${tabName}-tab`).style.display = 'block';
+            
+            // If switching to my-content tab, refresh list
+            if (tabName === 'my-content') {
+                updateMyContributionsTab();
+            }
+        }
+        
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Update page info
+            document.getElementById('pageInfo').textContent = 
+                `Naloženo: ${new Date().toLocaleString('sl-SI')}`;
+            
+            // Initialize Teams
+            setTimeout(initializeTeams, 500);
+            
+            // Load contributions
+            loadContributions();
+            
+            // Tab switching
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+            
+            // Add content button
+            document.getElementById('addContentBtn').addEventListener('click', () => openModal());
+            
+            // Add item buttons on category cards
+            document.querySelectorAll('.add-item-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const category = btn.getAttribute('data-category');
+                    openModal(category);
+                });
+            });
+            
+            // Category card click
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const category = card.getAttribute('data-category');
+                    openModal(category);
+                });
+            });
+            
+            // Modal buttons
+            document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('saveContentBtn').addEventListener('click', saveContribution);
+            
+            // Close modal when clicking outside
+            document.getElementById('modalOverlay').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('modalOverlay')) {
+                    closeModal();
+                }
+            });
+            
+            // Display current URL for Teams setup
+            document.getElementById('currentUrlDisplay').textContent = window.location.href;
+        });
+        
+        // Add beforeunload handler for Teams
+        window.addEventListener('beforeunload', () => {
+            if (teamsInitialized && microsoftTeams) {
+                console.log('Saving state before Teams unload...');
+            }
+        });
+    </script>
+</body>
+</html>
